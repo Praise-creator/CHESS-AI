@@ -34,7 +34,7 @@ class board:
                 possible_move_row, possible_move_col = possible_move
                 
                 if Square.in_range(possible_move_row, possible_move_col):
-                    if self.squares(possible_move_row, possible_move_col).isempty_or_rival(piece.color):
+                    if self.squares[possible_move_row] [possible_move_col].isempty_or_rival(piece.color):
                         #create squares of new move
                         initial = Square(row, col)
                         final = Square(possible_move_row, possible_move_col)
@@ -43,11 +43,12 @@ class board:
                         #append new valid move
                         piece.add_move(move)
         
+        
         if isinstance(piece, Pawn):
             pass
         
         elif isinstance(piece, Knight):
-            knight_moves
+            knight_moves()
             
         elif isinstance(piece, Bishop):
             pass
