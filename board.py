@@ -6,10 +6,38 @@ from move import Move
 class board: 
 
     def __init__(self) :
-        self.squares = [[0, 0, 0, 0, 0, 0, 0, 0] for col in range (COLS)]
+        self.squares = [[None for _ in range(COLS)] for _ in range(ROWS)]
+        self.last_move = None
         self._create()
         self._add_pieces('white')
         self._add_pieces('black')
+    
+
+    
+    
+    def move(self, piece, move):
+        initial = move.initial
+        final = move.final
+        
+        #console board move update
+        self.squares[initial.row][initial.col] = Square(initial.row, initial.col)
+        self.squares[final.row][final.col] = Square(final.row, final.col, piece)
+        
+        #move
+        piece.moved = True
+        
+        #clear valid moves
+        piece.clear_moves()
+        
+        #set last move
+        self.last_move = move
+        
+        
+    
+    def valid_move(self, piece, move):
+        return move in piece.moves
+    
+    
     
     def calc_moves(self, piece, row, col):
         '''
@@ -41,7 +69,7 @@ class board:
             possible_move_row = row + piece.dir
             possible_move_cols = [col - 1, col + 1]
             for possible_move_col in possible_move_cols:
-                if Square.in_range(possible_move_row, possible_move_cols):
+                if Square.in_range(possible_move_row, possible_move_col):
                     if self.squares[possible_move_row][possible_move_col].has_rival_piece(piece.color):
                         #create initial and final move squares
                         initial = Square(row, col)
@@ -92,15 +120,18 @@ class board:
                         
                         move = Move(initial, final)
                         # is empty
-                        if self.squares[possible_move_row][possible_move_col].isempty():
+                        if self.squares[possible_move_row][possible_move_col].is_empty():
                             piece.add_move(move)
                         #has enemy piece
-                        if self.squares[possible_move_row][possible_move_col].has_rival_piece(piece.color):
+                        elif self.squares[possible_move_row][possible_move_col].has_rival_piece(piece.color):
                             piece.add_move(move)
                             break
                         
                         #has team piece
-                        if self.squares[possible_move_row][possible_move_col].has_team_piece(piece.color):
+                        elif self.squares[possible_move_row][possible_move_col].has_team_piece(piece.color):
+                            break
+                        
+                        else:
                             break
                     
                     else: break
@@ -109,7 +140,35 @@ class board:
                     possible_move_row = possible_move_row + row_incr
                     possible_move_col = possible_move_col + col_incr
                         
-        
+        def king_moves():
+            adjs = [
+                (row-1, col+0), #up
+                (row - 1, col +1), # upright
+                (row+0, col+1), #right
+                (row+1, col+1), #downright
+                (row+1, col+0), #down
+                (row+1, col-1), #downleft
+                (row+0, col-1), #left
+                (row-1, col-1), #upleft
+            ]
+            #normal moves
+            for possible_move in adjs:
+                possible_move_row, possible_move_col = possible_move
+                
+                if Square.in_range(possible_move_row, possible_move_col):
+                    if self.squares[possible_move_row][possible_move_col].isempty_or_rival(piece.color):
+                        #create squares of new move
+                        initial = Square(row, col)
+                        final = Square(possible_move_row, possible_move_col)
+                        #create new move
+                        move = Move(initial, final)
+                        #append new valid move
+                        piece.add_move(move)
+            
+            #castling moves
+            #queen castling 
+            #king castling
+                        
         if isinstance(piece, Pawn): pawn_moves()
             
         
@@ -129,7 +188,7 @@ class board:
                 (-1, 1),(-1, -1),(1, 1),(1,-1),(-1, 0),(1, 0),(0, 1),(0,-1)
                  ])
         
-        elif isinstance(piece, King): pass
+        elif isinstance(piece, King): king_moves()
         
         
         
