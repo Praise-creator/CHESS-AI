@@ -15,7 +15,7 @@ class Square:
         return not self.has_piece()
     
     def has_team_piece(self, color):
-        return self.has_piece and self.piece.color == color
+        return self.has_piece and self.piece is not None and self.piece.color == color
     
     def has_rival_piece(self, color):
         return self.has_piece and self.piece is not None and self.piece.color != color
